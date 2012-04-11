@@ -64,4 +64,58 @@ def crawl_web(seed): # returns index, graph of inlinks
             crawled.append(page)
     return index, graph
 
-index, graph = crawl_web('http://www.udacity.com/cs101x/final/multi.html')
+def compute_ranks(graph):
+    d = 0.8 # damping factor
+    numloops = 10
+    
+    ranks = {}
+    npages = len(graph)
+    for page in graph:
+        ranks[page] = 1.0 / npages
+    
+    for i in range(0, numloops):
+        newranks = {}
+        for page in graph:
+            newrank = (1 - d) / npages
+            for node in graph:
+                if page in graph[node]:
+                    newrank += d * (ranks[node] / len(graph[node]))
+            newranks[page] = newrank
+        ranks = newranks
+    return ranks
+
+def lucky_search(index, ranks, keyword):
+    pages = lookup(index, keyword)
+    if not pages:
+        return None
+    best_page = pages[0]
+    for candidate in pages:
+        if ranks[candidate] > ranks[best_page]:
+            best_page = candidate
+    return best_page
+
+def quicksort_pages(pages, ranks):
+    if not pages or len(pages) <= 1:
+        return pages
+    else:
+        pivot = ranks[pages[0]] # find pivot
+        worse = []
+        better = []
+        for page in pages[1:]:
+            if ranks[page] <= pivot:
+                worse.append(page)
+            else:
+                better.append(page)
+        return quicksort_pages(better, ranks) + [pages[0]] + quicksort_pages(worse, ranks)
+
+def ordered_search(index, ranks, keyword):
+    pages = lookup(index, keyword)
+    return quicksort_pages(pages, ranks)
+
+## TESTS BELOW THIS LINE ##
+    
+index, graph = crawl_web('http://udacity.com/cs101x/urank/index.html')
+ranks = compute_ranks(graph)
+print lucky_search(index, ranks, 'the')
+print ordered_search(index, ranks, 'the')[0]
+print ordered_search(index, ranks, 'Hummus')[0]
