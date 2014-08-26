@@ -114,7 +114,7 @@ def ordered_search(index, ranks, keyword):
 
 ## TESTS BELOW THIS LINE ##
     
-index, graph = crawl_web('http://udacity.com/cs101x/urank/index.html')
+index, graph = crawl_web('http://www.udacity.com/cs101x/urank/index.html')
 ranks = compute_ranks(graph)
 print lucky_search(index, ranks, 'the')
 print ordered_search(index, ranks, 'the')[0]
